@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Inventory</string>
+
+    <!-- Title text for the empty view, which describes the empty warehouse image [CHAR LIMIT=50] -->
+    <string name="empty_view_title_text">It\'s a bit lonely here...</string>
+
+    <!-- Subtitle text for the empty view that prompts the user to add a oroduct [CHAR LIMIT=50] -->
+    <string name="empty_view_subtitle_text">Get started by adding a product</string>
+
+    <!-- Description for empty warehouse image for accessibility [CHAR LIMIT=50] -->
+    <string name="warehouse_image_text">Warehouse</string>
+
 </resources>
