@@ -10,4 +10,10 @@
     <!-- Description for empty warehouse image for accessibility [CHAR LIMIT=50] -->
     <string name="warehouse_image_text">Warehouse</string>
 
+    <!-- Title text for the quantity in the list item view -->
+    <string name="quantity">Quantity:</string>
+
+    <!-- Title text for the price in the list item view -->
+    <string name="price">Price: $</string>
+
 </resources>
