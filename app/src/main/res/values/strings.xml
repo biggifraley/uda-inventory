@@ -1,5 +1,12 @@
 <resources>
+    <!-- Name for the application [CHAR LIMIT=12] -->
     <string name="app_name">Inventory</string>
+
+    <!-- Label for overflow menu option that inserts fake product data into the app [CHAR LIMIT=20] -->
+    <string name="action_insert_dummy_data">Insert Dummy Data</string>
+
+    <!-- Label for overflow menu option that deletes all product data in the app [CHAR LIMIT=20] -->
+    <string name="action_delete_all_entries">Delete All Products</string>
 
     <!-- Title text for the empty view, which describes the empty warehouse image [CHAR LIMIT=50] -->
     <string name="empty_view_title_text">It\'s a bit lonely here...</string>
