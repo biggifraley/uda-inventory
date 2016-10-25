@@ -22,6 +22,9 @@ import android.widget.Toast;
 
 import com.example.android.inventory.data.ProductContract.ProductEntry;
 
+import java.text.DecimalFormat;
+import java.util.Locale;
+
 /**
  * Allows user to create a new product or edit an existing one.
  */
@@ -172,12 +175,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int quantity = cursor.getInt(quantityColumnIndex);
             double price = cursor.getDouble(priceColumnIndex);
 
+            // Format the price to show 2 decimal places
+            String formattedPrice = formatPrice(price);
+
             // For each of the textViews I’ll set the proper text.
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);
             mSupplierEditText.setText(supplier);
-            mQuantityEditText.setText(Integer.toString(quantity));
-            mPriceEditText.setText(String.format("%1$.2f", price));
+            mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", quantity));
+            // mQuantityEditText.setText(Integer.toString(quantity));
+            mPriceEditText.setText(formattedPrice);
+            // mPriceEditText.setText(String.format("%1$.2f", price));
         }
     }
 
@@ -191,7 +199,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /**
-     * Get user input from editor and save new pet into database
+     * Get user input from editor and save new product into database
      */
     private void saveProduct() {
         // Read from input fields
@@ -215,12 +223,19 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             quantity = Integer.parseInt(quantityString);
         }
 
+        // Default price to 0.00.
+        double price = 0.00;
+        // If a price has been entered, convert to double.
+        if (!TextUtils.isEmpty(priceString)) {
+            price = Double.parseDouble(priceString);
+        }
+
         // Create a ContentValues object where column names are the keys,
         // and product attributes from the editor are the values.
         ContentValues values = new ContentValues();
         values.put(ProductEntry.COLUMN_PRODUCT_NAME, nameString);
-        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, priceString);
-        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantityString);
+        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, price);
+        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
         values.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER, supplierString);
 
         // Check if we are updating an existing product or inserting a new product
@@ -428,5 +443,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    /**
+     * Return the formatted price string showing 2 decimal places (i.e. "3.22")
+     * from a decimal price value.
+     */
+    private String formatPrice(double price) {
+        DecimalFormat priceFormat = new DecimalFormat("0.00");
+        return priceFormat.format(price);
     }
 }
