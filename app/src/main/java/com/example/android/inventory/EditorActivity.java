@@ -213,8 +213,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // If so, do nothing and exit.
         // (In the lessons, the following is being checked only for insert operations
         // in mCurrentProduct == null below, however, I leave it up here, because a user
-        // may mistakenly try to delete a pet in the editor by emptying all fields.)
+        // may mistakenly try to delete a product in the editor by emptying all fields.)
         if (TextUtils.isEmpty(nameString) && TextUtils.isEmpty(supplierString) && TextUtils.isEmpty(quantityString) && TextUtils.isEmpty(priceString)) return;
+
+        // Validate the product name and supplier. If empty, alert user that information is required.
+        if (TextUtils.isEmpty(nameString) || TextUtils.isEmpty(supplierString)) {
+
+            Toast.makeText(this, getString(R.string.editor_insert_required_info),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
 
         // Default quantity to 0.
         int quantity = 0;
@@ -268,6 +276,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                         Toast.LENGTH_SHORT).show();
             }
         }
+        // Once the delete operation is done, then the activity can be closed
+        // by calling the finish() method.
+        finish();
     }
 
     /**
@@ -329,7 +340,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 // Save product to database
                 saveProduct();
                 // Exit activity
-                finish();
+                // finish();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -419,6 +430,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         showUnsavedChangesDialog(discardButtonClickListener);
     }
 
+    /**
+     * This method is called when the delete menu option is pressed.
+     */
     private void showDeleteConfirmationDialog() {
         // Create an AlertDialog.Builder and set the message, and click listeners
         // for the positive and negative buttons on the dialog.

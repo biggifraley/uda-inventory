@@ -62,6 +62,9 @@
     <!-- Units for price of the product ($) [CHAR LIMIT=5] -->
     <string name="unit_product_price">$</string>
 
+    <!-- Toast message in editor when product is saved without name or supplier [CHAR LIMIT=NONE] -->
+    <string name="editor_insert_required_info">You must provide a product name and supplier!</string>
+
     <!-- Toast message in editor when new product has been successfully inserted [CHAR LIMIT=NONE] -->
     <string name="editor_insert_product_successful">Product saved</string>
 
