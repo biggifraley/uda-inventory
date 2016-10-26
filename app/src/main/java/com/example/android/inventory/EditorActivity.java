@@ -78,9 +78,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     // Defines a variable to contain the quantity of product sold, received, or to reorder
     int updateQuantity = 0;
 
-    // Defines constants to signal whether quantity change is sale or shipment received
+    // Defines constants to signal whether quantity change is sale, reorder, or shipment received
     private static final int SALE = 0;
     private static final int SHIPMENT = 1;
+    private static final int REORDER = 2;
 
 
     /**
@@ -375,7 +376,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 return true;
             // Respond to a click on the "Reorder" menu option
             case R.id.action_reorder:
-                // TODO: add method to reorder from supplier
+                showQuantityDialog(REORDER);
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -504,22 +505,28 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             dialogBuilder.setMessage(R.string.quantity_dialog_sale_msg);
         } else if (updateType == SHIPMENT) {
             dialogBuilder.setMessage(R.string.quantity_dialog_shipment_msg);
+        } else if (updateType == REORDER) {
+            dialogBuilder.setMessage(R.string.quantity_dialog_reorder_msg);
         }
 
         dialogBuilder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 updateQuantity = Integer.parseInt(quantityUpdateText.getText().toString().trim());
                 String quantityString = mQuantityEditText.getText().toString().trim();
-                Integer newQuantity = 0;
+                Integer newQuantity;
                 if (updateType == SALE) {
                     newQuantity = Math.max((Integer.parseInt(quantityString) - updateQuantity), 0);
+                    mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", newQuantity));
+                    saveProduct();
                 } else if (updateType == SHIPMENT) {
                     newQuantity = Integer.parseInt(quantityString) + updateQuantity;
+                    mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", newQuantity));
+                    saveProduct();
+                } else if (updateType == REORDER) {
+                    sendOrderEmail(Integer.parseInt(quantityString));
                 }
-                mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", newQuantity));
-                // mProductHasChanged = true;
-                saveProduct();
-                Log.v(LOG_TAG, "Update type: " + updateType + "\nOriginal Quantity is: " + quantityString + "\nQuantity entered is: " + updateQuantity + "\nNew Quantity is: " + newQuantity);
+
+                // Log.v(LOG_TAG, "Update type: " + updateType + "\nOriginal Quantity is: " + quantityString + "\nQuantity entered is: " + updateQuantity + "\nNew Quantity is: " + newQuantity);
             }
         });
         dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -544,5 +551,22 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private String formatPrice(double price) {
         DecimalFormat priceFormat = new DecimalFormat("0.00");
         return priceFormat.format(price);
+    }
+
+    public void sendOrderEmail(int quantity) {
+        String nameString = mNameEditText.getText().toString().trim();
+        String supplierString = mSupplierEditText.getText().toString().trim();
+        String priceString = mPriceEditText.getText().toString().trim();
+
+        String emailSubject = "Order of " + nameString;
+        String orderSummary = supplierString + ",\n\nI would like to order: \n\n" + quantity + " " + nameString + " at a unit price of $" + priceString + ".\n\nThank you!";
+
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_SUBJECT, emailSubject);
+        intent.putExtra(Intent.EXTRA_TEXT, orderSummary);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 }

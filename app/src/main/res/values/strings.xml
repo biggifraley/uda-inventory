@@ -107,11 +107,14 @@
     <!-- Dialog message to ask the user to confirm deleting the current product [CHAR LIMIT=NONE] -->
     <string name="delete_dialog_msg">Delete this product?</string>
 
-    <!-- Dialog message to ask the user for input of the quantity of the current product [CHAR LIMIT=NONE] -->
+    <!-- Dialog message to ask the user for input of the quantity of the current product sold [CHAR LIMIT=NONE] -->
     <string name="quantity_dialog_sale_msg">Please enter the quantity sold</string>
 
-    <!-- Dialog message to ask the user for input of the quantity of the current product [CHAR LIMIT=NONE] -->
+    <!-- Dialog message to ask the user for input of the quantity of the current product received [CHAR LIMIT=NONE] -->
     <string name="quantity_dialog_shipment_msg">Please enter the quantity received</string>
+
+    <!-- Dialog message to ask the user for input of the quantity of the current product to reorder [CHAR LIMIT=NONE] -->
+    <string name="quantity_dialog_reorder_msg">Please enter the quantity to reorder</string>
 
     <!-- Dialog button text for the option to complete entering of quantity for the current product [CHAR LIMIT=20] -->
     <string name="done">Save</string>
