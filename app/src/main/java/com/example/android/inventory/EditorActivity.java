@@ -13,6 +13,8 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -29,6 +31,8 @@ import java.util.Locale;
  * Allows user to create a new product or edit an existing one.
  */
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    public static final String LOG_TAG = EditorActivity.class.getSimpleName();
 
     /**
      * Identifier for the product data loader
@@ -70,6 +74,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      * Boolean flag that keeps track of whether the product has been edited (true) or not (false)
      */
     private boolean mProductHasChanged = false;
+
+    // Defines a variable to contain the quantity of product sold, received, or to reorder
+    int updateQuantity = 0;
+
+    // Defines constants to signal whether quantity change is sale or shipment received
+    private static final int SALE = 0;
+    private static final int SHIPMENT = 1;
+
 
     /**
      * OnTouchListener that listens for any user touches on a View, implying that they are modifying
@@ -276,7 +288,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                         Toast.LENGTH_SHORT).show();
             }
         }
-        // Once the delete operation is done, then the activity can be closed
+        // Once the save operation is done, then the activity can be closed
         // by calling the finish() method.
         finish();
     }
@@ -325,8 +337,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         super.onPrepareOptionsMenu(menu);
         // If this is a new product, hide the "Delete" menu item.
         if (mCurrentProductUri == null) {
-            MenuItem menuItem = menu.findItem(R.id.action_delete);
-            menuItem.setVisible(false);
+            MenuItem deleteMenuItem = menu.findItem(R.id.action_delete);
+            deleteMenuItem.setVisible(false);
+            MenuItem saleMenuItem = menu.findItem(R.id.action_sale);
+            saleMenuItem.setVisible(false);
+            MenuItem receiveMenuItem = menu.findItem(R.id.action_receive);
+            receiveMenuItem.setVisible(false);
+            MenuItem reorderMenuItem = menu.findItem(R.id.action_reorder);
+            reorderMenuItem.setVisible(false);
         }
         return true;
     }
@@ -346,6 +364,18 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case R.id.action_delete:
                 // Show a dialog that confirms the user wants to delete the pet
                 showDeleteConfirmationDialog();
+                return true;
+            // Respond to a click on the "Sale" menu option
+            case R.id.action_sale:
+                showQuantityDialog(SALE);
+                return true;
+            // Respond to a click on the "Shipment" menu option
+            case R.id.action_receive:
+                showQuantityDialog(SHIPMENT);
+                return true;
+            // Respond to a click on the "Reorder" menu option
+            case R.id.action_reorder:
+                // TODO: add method to reorder from supplier
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -456,6 +486,54 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * This method is called when the sale, receive, or reorder menu option is pressed.
+     */
+    private void showQuantityDialog(final int updateType) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.quantity_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText quantityUpdateText = (EditText) dialogView.findViewById(R.id.edit_quantity);
+
+        if (updateType == SALE) {
+            dialogBuilder.setMessage(R.string.quantity_dialog_sale_msg);
+        } else if (updateType == SHIPMENT) {
+            dialogBuilder.setMessage(R.string.quantity_dialog_shipment_msg);
+        }
+
+        dialogBuilder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                updateQuantity = Integer.parseInt(quantityUpdateText.getText().toString().trim());
+                String quantityString = mQuantityEditText.getText().toString().trim();
+                Integer newQuantity = 0;
+                if (updateType == SALE) {
+                    newQuantity = Math.max((Integer.parseInt(quantityString) - updateQuantity), 0);
+                } else if (updateType == SHIPMENT) {
+                    newQuantity = Integer.parseInt(quantityString) + updateQuantity;
+                }
+                mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", newQuantity));
+                // mProductHasChanged = true;
+                saveProduct();
+                Log.v(LOG_TAG, "Update type: " + updateType + "\nOriginal Quantity is: " + quantityString + "\nQuantity entered is: " + updateQuantity + "\nNew Quantity is: " + newQuantity);
+            }
+        });
+        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.show();
     }
 

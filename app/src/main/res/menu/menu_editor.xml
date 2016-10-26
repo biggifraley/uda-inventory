@@ -12,7 +12,22 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_delete"
-        android:title="@string/action_delete"
+    android:id="@+id/action_delete"
+    android:title="@string/action_delete"
+    app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sale"
+        android:title="@string/action_sale"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_receive"
+        android:title="@string/action_receive"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_reorder"
+        android:title="@string/action_reorder"
         app:showAsAction="never" />
 </menu>

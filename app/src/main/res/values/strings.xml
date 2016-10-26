@@ -12,7 +12,16 @@
     <string name="action_save">Save</string>
 
     <!-- Label for editor overflow menu option that deletes the current product [CHAR LIMIT=20] -->
-    <string name="action_delete">Delete</string>
+    <string name="action_delete">Delete Product</string>
+
+    <!-- Label for editor overflow menu option that records sale of the current product [CHAR LIMIT=20] -->
+    <string name="action_sale">Record Sale</string>
+
+    <!-- Label for editor overflow menu option that records shipment of the current product received [CHAR LIMIT=20] -->
+    <string name="action_receive">Receive Shipment</string>
+
+    <!-- Label for editor overflow menu option that reorders the current product from supplier [CHAR LIMIT=20] -->
+    <string name="action_reorder">Reorder Product</string>
 
     <!-- Title for the activity to add a new product [CHAR LIMIT=20] -->
     <string name="editor_activity_title_new_product">Add a Product</string>
@@ -83,6 +92,9 @@
     <!-- Toast message in editor when current product has failed to be deleted [CHAR LIMIT=NONE] -->
     <string name="editor_delete_product_failed">Error with deleting product</string>
 
+    <!-- Toast message in editor when product quantity has been successfully updated [CHAR LIMIT=NONE] -->
+    <string name="editor_update_quantity_successful">Quantity successfully updated. Save product to complete.</string>
+
     <!-- Dialog message when user is leaving editor but hasn't saved changes [CHAR LIMIT=NONE] -->
     <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
 
@@ -94,6 +106,15 @@
 
     <!-- Dialog message to ask the user to confirm deleting the current product [CHAR LIMIT=NONE] -->
     <string name="delete_dialog_msg">Delete this product?</string>
+
+    <!-- Dialog message to ask the user for input of the quantity of the current product [CHAR LIMIT=NONE] -->
+    <string name="quantity_dialog_sale_msg">Please enter the quantity sold</string>
+
+    <!-- Dialog message to ask the user for input of the quantity of the current product [CHAR LIMIT=NONE] -->
+    <string name="quantity_dialog_shipment_msg">Please enter the quantity received</string>
+
+    <!-- Dialog button text for the option to complete entering of quantity for the current product [CHAR LIMIT=20] -->
+    <string name="done">Save</string>
 
     <!-- Dialog button text for the option to confirm deleting the current product [CHAR LIMIT=20] -->
     <string name="delete">Delete</string>
