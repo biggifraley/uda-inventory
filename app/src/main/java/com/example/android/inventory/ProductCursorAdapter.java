@@ -4,11 +4,15 @@ package com.example.android.inventory;
  * Created by Biggi on 10/16/2016.
  */
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
@@ -46,8 +50,8 @@ public class ProductCursorAdapter extends CursorAdapter {
     }
 
     /**
-     * This method binds the pet data (in the current row pointed to by cursor) to the given
-     * list item layout. For example, the name for the current pet can be set on the name TextView
+     * This method binds the product data (in the current row pointed to by cursor) to the given
+     * list item layout. For example, the name for the current product can be set on the name TextView
      * in the list item layout.
      *
      * @param view    Existing view, returned earlier by newView() method
@@ -60,21 +64,41 @@ public class ProductCursorAdapter extends CursorAdapter {
 
         // Find fields to populate in inflated template
         TextView nameTextView = (TextView) view.findViewById(R.id.name);
-        TextView quantityTextView = (TextView) view.findViewById(R.id.quantity);
+        final TextView quantityTextView = (TextView) view.findViewById(R.id.quantity);
         TextView priceTextView = (TextView) view.findViewById(R.id.price);
+
+        // Find sale button in inflated view
+        Button saleButton = (Button) view.findViewById(R.id.sale_btn);
 
         // Find the columns of product attributes that we're interested in and
         // extract properties from cursor.
-        String productName = cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_NAME));
-        String productQuantity = "Quantity: " + cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_QUANTITY));
-        String productPrice = "Price: $" + cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_PRICE));
+        final String productName = cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_NAME));
+        final String productQuantity = cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_QUANTITY));
+        final String productPrice = cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_PRICE));
+        final String productId = cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry._ID));
 
-//        Integer productQuantity = cursor.getInt(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_QUANTITY));
-//        Long productPrice = cursor.getLong(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_PRODUCT_PRICE));
+        // Set onclick listener on sale button
+        saleButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                int saleQuantity = Integer.parseInt(productQuantity);
+                if (saleQuantity > 0) {
+                    saleQuantity -= 1;
+                    ContentValues values = new ContentValues();
+                    values.put(ProductContract.ProductEntry.COLUMN_PRODUCT_QUANTITY, saleQuantity);
+                    Uri currentProductUri = ContentUris.withAppendedId(ProductContract.ProductEntry.CONTENT_URI, Long.parseLong(productId));
+                    // Update the existing product's quantity and return the number of rows returned
+                    view.getContext().getContentResolver().update(currentProductUri, values, null, null);
+                }
+            }
+        });
+
+        String productDisplayQuantity = "Quantity: " + productQuantity;
+        String productDisplayPrice = "Price: $" + productPrice;
 
         // Populate fields with extracted properties
         nameTextView.setText(productName);
-        quantityTextView.setText(productQuantity);
-        priceTextView.setText(productPrice);
+        quantityTextView.setText(productDisplayQuantity);
+        priceTextView.setText(productDisplayPrice);
     }
 }
