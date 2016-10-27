@@ -83,7 +83,7 @@ public class ProductCursorAdapter extends CursorAdapter {
             public void onClick(View view) {
                 int saleQuantity = Integer.parseInt(productQuantity);
                 if (saleQuantity > 0) {
-                    saleQuantity -= 1;
+                    saleQuantity -= 1; //TODO: change to saleQuantity--; and test again
                     ContentValues values = new ContentValues();
                     values.put(ProductContract.ProductEntry.COLUMN_PRODUCT_QUANTITY, saleQuantity);
                     Uri currentProductUri = ContentUris.withAppendedId(ProductContract.ProductEntry.CONTENT_URI, Long.parseLong(productId));
@@ -93,7 +93,7 @@ public class ProductCursorAdapter extends CursorAdapter {
             }
         });
 
-        String productDisplayQuantity = "Quantity: " + productQuantity;
+        String productDisplayQuantity = "Quantity: " + productQuantity; //TODO: figure out how to use string resource here
         String productDisplayPrice = "Price: $" + productPrice;
 
         // Populate fields with extracted properties

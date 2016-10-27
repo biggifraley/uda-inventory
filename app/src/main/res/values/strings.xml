@@ -127,5 +127,7 @@
 
     <!-- Label for sale button in catalog activity [CHAR LIMIT=12] -->
     <string name="sale_btn">Sale</string>
+    <string name="select_image">Select Image</string>
+    <string name="category_image">Product Image</string>
 
 </resources>

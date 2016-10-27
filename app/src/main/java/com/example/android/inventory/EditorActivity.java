@@ -1,5 +1,6 @@
 package com.example.android.inventory;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
@@ -8,7 +9,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,11 +24,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.inventory.data.ProductContract.ProductEntry;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
@@ -35,6 +45,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     public static final String LOG_TAG = EditorActivity.class.getSimpleName();
 
     /**
+     * Identifier for the image picker
+     */
+    private static final int PICK_IMAGE_REQUEST = 0;
+
+    /**
      * Identifier for the product data loader
      */
     private static final int EXISTING_PRODUCT_LOADER = 0;
@@ -44,11 +59,20 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      */
     private Uri mCurrentProductUri;
 
-    // Defines a variable to contain the number of updated rows
-    int mRowsUpdated = 0;
+    /**
+     * URI for the product image (null if it's a new image)
+     */
+    private Uri mProductImageUri;
 
-    // Defines a variable to contain the number of updated rows
-    int mRowsDeleted = 0;
+    /**
+     * Defines a variable to contain the number of updated rows
+     */
+    private int mRowsUpdated = 0;
+
+    /**
+     * Defines a variable to contain the number of updated rows
+     */
+    private int mRowsDeleted = 0;
 
     /**
      * EditText field to enter the product's name
@@ -71,18 +95,36 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mSupplierEditText;
 
     /**
+     * Button to select the product's image
+     */
+    private Button mImageButton;
+
+    /**
+     * ImageView field for the product's image
+     */
+    private ImageView mPictureImageView;
+
+    /**
+     * TextView field for the product image's uri
+     */
+    private TextView mPictureUriTextView;
+
+    /**
      * Boolean flag that keeps track of whether the product has been edited (true) or not (false)
      */
     private boolean mProductHasChanged = false;
 
-    // Defines a variable to contain the quantity of product sold, received, or to reorder
-    int updateQuantity = 0;
+    /**
+    * Defines a variable to contain the quantity of product sold, received, or to reorder
+    */
+    private int updateQuantity = 0;
 
-    // Defines constants to signal whether quantity change is sale, reorder, or shipment received
+    /**
+     * Defines constants to signal whether quantity change is sale, reorder, or shipment received
+     */
     private static final int SALE = 0;
     private static final int SHIPMENT = 1;
     private static final int REORDER = 2;
-
 
     /**
      * OnTouchListener that listens for any user touches on a View, implying that they are modifying
@@ -133,6 +175,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mSupplierEditText = (EditText) findViewById(R.id.edit_product_supplier);
         mQuantityEditText = (EditText) findViewById(R.id.edit_product_quantity);
         mPriceEditText = (EditText) findViewById(R.id.edit_product_price);
+        mPictureUriTextView = (TextView) findViewById(R.id.image_uri);
+        mImageButton = (Button) findViewById(R.id.select_image);
+        mPictureImageView = (ImageView) findViewById(R.id.image_bitmap);
 
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
@@ -141,18 +186,20 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mSupplierEditText.setOnTouchListener(mTouchListener);
         mQuantityEditText.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
+        mImageButton.setOnTouchListener(mTouchListener);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-        // Since the editor shows all pet attributes, define a projection that contains
+        // Since the editor shows all product attributes, define a projection that contains
         // all columns from the product table
         String[] projection = {
                 ProductEntry._ID,
                 ProductEntry.COLUMN_PRODUCT_NAME,
                 ProductEntry.COLUMN_PRODUCT_PRICE,
                 ProductEntry.COLUMN_PRODUCT_QUANTITY,
-                ProductEntry.COLUMN_PRODUCT_SUPPLIER
+                ProductEntry.COLUMN_PRODUCT_SUPPLIER,
+                ProductEntry.COLUMN_PRODUCT_IMAGE
         };
 
         // Now create and return a CursorLoader that will take care of
@@ -181,12 +228,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int priceColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_PRICE);
             int quantityColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY);
             int supplierColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_SUPPLIER);
+            int imageColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_IMAGE);
 
-            // Extract out the value from the Cursor for the given column ind
+            // Extract out the value from the Cursor for the given column index
             String name = cursor.getString(nameColumnIndex);
             String supplier = cursor.getString(supplierColumnIndex);
             int quantity = cursor.getInt(quantityColumnIndex);
             double price = cursor.getDouble(priceColumnIndex);
+            String image = cursor.getString(imageColumnIndex);
 
             // Format the price to show 2 decimal places
             String formattedPrice = formatPrice(price);
@@ -199,6 +248,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // mQuantityEditText.setText(Integer.toString(quantity));
             mPriceEditText.setText(formattedPrice);
             // mPriceEditText.setText(String.format("%1$.2f", price));
+            mPictureUriTextView.setText(image);
+
+            // If there's an image uri in the database,
+            // parse the image uri string and set mProductImageUri, and
+            // update the image view
+            if (image != null) {
+                mProductImageUri = Uri.parse(image);
+                mPictureImageView.setImageBitmap(getBitmapFromUri(mProductImageUri));
+            }
         }
     }
 
@@ -209,6 +267,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mSupplierEditText.setText("");
         mQuantityEditText.setText("");
         mPriceEditText.setText("");
+        mPictureUriTextView.setText("");
     }
 
     /**
@@ -221,13 +280,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String supplierString = mSupplierEditText.getText().toString().trim();
         String quantityString = mQuantityEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
+        String imageString = mPictureUriTextView.getText().toString().trim();
 
         // Check if all the fields are empty, and save button has been pressed accidentally.
         // If so, do nothing and exit.
         // (In the lessons, the following is being checked only for insert operations
         // in mCurrentProduct == null below, however, I leave it up here, because a user
         // may mistakenly try to delete a product in the editor by emptying all fields.)
-        if (TextUtils.isEmpty(nameString) && TextUtils.isEmpty(supplierString) && TextUtils.isEmpty(quantityString) && TextUtils.isEmpty(priceString)) return;
+        if (TextUtils.isEmpty(nameString) && TextUtils.isEmpty(supplierString) && TextUtils.isEmpty(quantityString) && TextUtils.isEmpty(priceString) && TextUtils.isEmpty(imageString)) return;
 
         // Validate the product name and supplier. If empty, alert user that information is required.
         if (TextUtils.isEmpty(nameString) || TextUtils.isEmpty(supplierString)) {
@@ -258,6 +318,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(ProductEntry.COLUMN_PRODUCT_PRICE, price);
         values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
         values.put(ProductEntry.COLUMN_PRODUCT_SUPPLIER, supplierString);
+        values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, imageString);
 
         // Check if we are updating an existing product or inserting a new product
         if (mCurrentProductUri == null) {
@@ -336,7 +397,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        // If this is a new product, hide the "Delete" menu item.
+        // If this is a new product, hide the unnecessary menu items.
         if (mCurrentProductUri == null) {
             MenuItem deleteMenuItem = menu.findItem(R.id.action_delete);
             deleteMenuItem.setVisible(false);
@@ -567,6 +628,65 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         intent.putExtra(Intent.EXTRA_TEXT, orderSummary);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
+        }
+    }
+
+    public void openImageSelector(View view) {
+        Intent intent;
+
+        if (Build.VERSION.SDK_INT < 19) {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+        } else {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }
+
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        // The ACTION_OPEN_DOCUMENT intent was sent with the request code READ_REQUEST_CODE.
+        // If the request code seen here doesn't match, it's the response to some other intent,
+        // and the below code shouldn't run at all.
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+            // The document selected by the user won't be returned in the intent.
+            // Instead, a URI to that document will be contained in the return intent
+            // provided to this method as a parameter.  Pull that uri using "resultData.getData()"
+
+            if (resultData != null) {
+                mProductImageUri = resultData.getData();
+                Log.i(LOG_TAG, "Uri: " + mProductImageUri.toString());
+
+                mPictureUriTextView.setText(mProductImageUri.toString());
+                mPictureImageView.setImageBitmap(getBitmapFromUri(mProductImageUri));
+            }
+        }
+    }
+
+    private Bitmap getBitmapFromUri(Uri uri) {
+        ParcelFileDescriptor parcelFileDescriptor = null;
+        try {
+            parcelFileDescriptor =
+                    getContentResolver().openFileDescriptor(uri, "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            parcelFileDescriptor.close();
+            return image;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Failed to load image.", e);
+            return null;
+        } finally {
+            try {
+                if (parcelFileDescriptor != null) {
+                    parcelFileDescriptor.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "Error closing ParcelFile Descriptor");
+            }
         }
     }
 }

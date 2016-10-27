@@ -134,9 +134,9 @@ public class ProductProvider extends ContentProvider {
             throw new IllegalArgumentException("Product requires a name");
         }
 
-        // If the price is provided, check that it's greater than or equal to 0
-        Long price = values.getAsLong(ProductEntry.COLUMN_PRODUCT_PRICE);
-        if (price != null && price < 0) {
+        // Check that the price is not null and that it's greater than or equal to 0
+        Double price = values.getAsDouble(ProductEntry.COLUMN_PRODUCT_PRICE);
+        if (price == null || price < 0) {
             throw new IllegalArgumentException("Product requires valid price");
         }
 
@@ -238,16 +238,6 @@ public class ProductProvider extends ContentProvider {
             String supplier = values.getAsString(ProductEntry.COLUMN_PRODUCT_SUPPLIER);
             if (supplier == null) {
                 throw new IllegalArgumentException("Product requires valid supplier");
-            }
-        }
-
-        // If the {@link ProductEntry#COLUMN_PRODUCT_QUANTITY} key is present,
-        // check that the quantity value is valid.
-        if (values.containsKey(ProductEntry.COLUMN_PRODUCT_QUANTITY)) {
-            // Check that the quantity is greater than or equal to 0
-            Integer quantity = values.getAsInteger(ProductEntry.COLUMN_PRODUCT_QUANTITY);
-            if (quantity != null && quantity < 0) {
-                throw new IllegalArgumentException("Product requires valid quantity");
             }
         }
 
