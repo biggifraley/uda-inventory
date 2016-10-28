@@ -60,7 +60,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Uri mCurrentProductUri;
 
     /**
-     * URI for the product image (null if it's a new image)
+     * File URI for the product image (null if it's a new image)
      */
     private Uri mProductImageUri;
 
@@ -100,7 +100,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Button mImageButton;
 
     /**
-     * ImageView field for the product's image
+     * ImageView for the product's image
      */
     private ImageView mPictureImageView;
 
@@ -115,8 +115,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private boolean mProductHasChanged = false;
 
     /**
-    * Defines a variable to contain the quantity of product sold, received, or to reorder
-    */
+     * Defines a variable to contain the quantity of product sold, received, or to reorder
+     */
     private int updateQuantity = 0;
 
     /**
@@ -144,26 +144,19 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         setContentView(R.layout.activity_editor);
 
         // Examine the intent that was used to launch this activity,
-        // in order to figure out if we're creating a new product or editing and existing one.
-        // Use getIntent() and getData() to get the associated URI
+        // in order to figure out if we're creating a new product or editing an existing one.
         Intent intent = getIntent();
         mCurrentProductUri = intent.getData();
-
-        // Set title of EditorActivity depending on which situation we have.
-        // If the EditorActivity was opened using the ListView item, then we will
-        // have uri of product, so change app bar to say "Edit Product."
-        // Otherwise, if this is a new product, uri is null, so change app bar to say "Add a Product."
 
         // If the intent DOES NOT contain a product content URI, then we know we are
         // creating new product.
         if (mCurrentProductUri == null) {
-            // change app bar to say "Add a Product"
+            // Change app bar to say "Add a Product"
             setTitle(getString(R.string.editor_activity_title_new_product));
-            // Invalidate the options menu, so the "Delete" menu option can be hidden.
-            // (It doesn't make sense to delete a product that hasn't been created yet.)
+            // Invalidate the options menu, so the unnecessary menu options can be hidden.
             invalidateOptionsMenu();
         } else {
-            // change app bar to say "Edit Product"
+            // Change app bar to say "Edit Product"
             setTitle(getString(R.string.editor_activity_title_edit_product));
             // Initialize a loader to read the product data from the database
             // and display the current values in the editor
@@ -215,15 +208,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             return;
         }
 
-        // When the data from the product is loaded into a cursor, onLoadFinished() is called.
-        // Here, I’ll first move the cursor to it’s first item position. Even though it only
-        // has one item, it starts at position -1.
         // Proceed with moving to the first row of the cursor and reading data from it.
-        // (This should be the only row in the cursor.)
-        // Then I’ll get the data out of the cursor by getting the index of each data item,
-        // and then using the indices and the get methods to grab the actual integers and strings.
         if (cursor.moveToFirst()) {
-            // Find the columns of pet attributes that we're interested in
+            // Find the columns of product attributes that we're interested in
             int nameColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_NAME);
             int priceColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_PRICE);
             int quantityColumnIndex = cursor.getColumnIndex(ProductEntry.COLUMN_PRODUCT_QUANTITY);
@@ -240,20 +227,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // Format the price to show 2 decimal places
             String formattedPrice = formatPrice(price);
 
-            // For each of the textViews I’ll set the proper text.
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);
             mSupplierEditText.setText(supplier);
-            mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", quantity));
-            // mQuantityEditText.setText(Integer.toString(quantity));
+            mQuantityEditText.setText(String.format(Locale.getDefault(), "%1$d", quantity));
             mPriceEditText.setText(formattedPrice);
-            // mPriceEditText.setText(String.format("%1$.2f", price));
             mPictureUriTextView.setText(image);
 
-            // If there's an image uri in the database,
-            // parse the image uri string and set mProductImageUri, and
-            // update the image view
-            if (image != null) {
+            // If there's an image uri in the database, parse it and update the image view
+            if (!TextUtils.isEmpty(image)) {
                 mProductImageUri = Uri.parse(image);
                 mPictureImageView.setImageBitmap(getBitmapFromUri(mProductImageUri));
             }
@@ -275,7 +257,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      */
     private void saveProduct() {
         // Read from input fields
-        // Use trim to eliminate leading or trailing white space
         String nameString = mNameEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
         String quantityString = mQuantityEditText.getText().toString().trim();
@@ -284,14 +265,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // Check if all the fields are empty, and save button has been pressed accidentally.
         // If so, do nothing and exit.
-        // (In the lessons, the following is being checked only for insert operations
-        // in mCurrentProduct == null below, however, I leave it up here, because a user
-        // may mistakenly try to delete a product in the editor by emptying all fields.)
-        if (TextUtils.isEmpty(nameString) && TextUtils.isEmpty(supplierString) && TextUtils.isEmpty(quantityString) && TextUtils.isEmpty(priceString) && TextUtils.isEmpty(imageString)) return;
+        if (TextUtils.isEmpty(nameString) && TextUtils.isEmpty(supplierString) && TextUtils.isEmpty(quantityString) && TextUtils.isEmpty(priceString) && TextUtils.isEmpty(imageString))
+            return;
 
         // Validate the product name and supplier. If empty, alert user that information is required.
         if (TextUtils.isEmpty(nameString) || TextUtils.isEmpty(supplierString)) {
-
             Toast.makeText(this, getString(R.string.editor_insert_required_info),
                     Toast.LENGTH_LONG).show();
             return;
@@ -350,8 +328,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                         Toast.LENGTH_SHORT).show();
             }
         }
-        // Once the save operation is done, then the activity can be closed
-        // by calling the finish() method.
+        // Once the save operation is done, then the activity can be closed.
         finish();
     }
 
@@ -362,7 +339,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // Only perform the delete if this is an existing product.
         if (mCurrentProductUri != null) {
-            // Delete the existing pet and return the number of rows returned
+            // Delete the existing product and return the number of rows returned
             mRowsDeleted = getContentResolver().delete(mCurrentProductUri, null, null);
 
             // Show a toast message depending on whether or not the delete was successful
@@ -377,8 +354,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         }
 
-        // Once the delete operation is done, then the activity can be closed
-        // by calling the finish() method.
+        // Once the delete operation is done, then the activity can be closed.
         finish();
     }
 
@@ -419,24 +395,25 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case R.id.action_save:
                 // Save product to database
                 saveProduct();
-                // Exit activity
-                // finish();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Show a dialog that confirms the user wants to delete the pet
+                // Show a dialog that confirms the user wants to delete the product
                 showDeleteConfirmationDialog();
                 return true;
             // Respond to a click on the "Sale" menu option
             case R.id.action_sale:
+                // Show a dialog to allow the user to input the sale quantity
                 showQuantityDialog(SALE);
                 return true;
             // Respond to a click on the "Shipment" menu option
             case R.id.action_receive:
+                // Show a dialog to allow the user to input the shipment quantity
                 showQuantityDialog(SHIPMENT);
                 return true;
             // Respond to a click on the "Reorder" menu option
             case R.id.action_reorder:
+                // Show a dialog to allow the user to input the reorder quantity
                 showQuantityDialog(REORDER);
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
@@ -484,7 +461,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Keep editing" button, so dismiss the dialog
-                // and continue editing the pet.
+                // and continue editing the product.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
@@ -501,7 +478,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      */
     @Override
     public void onBackPressed() {
-        // If the pet hasn't changed, continue with handling back button press
+        // If the product hasn't changed, continue with handling back button press
         if (!mProductHasChanged) {
             super.onBackPressed();
             return;
@@ -532,14 +509,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         builder.setMessage(R.string.delete_dialog_msg);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Delete" button, so delete the pet and close editor.
+                // User clicked the "Delete" button, so delete the product and close editor.
                 deleteProduct();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Cancel" button, so dismiss the dialog
-                // and continue editing the pet.
+                // and continue editing the product.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
@@ -555,6 +532,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      * This method is called when the sale, receive, or reorder menu option is pressed.
      */
     private void showQuantityDialog(final int updateType) {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.quantity_dialog, null);
@@ -562,6 +541,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         final EditText quantityUpdateText = (EditText) dialogView.findViewById(R.id.edit_quantity);
 
+        // Change the dialog message depending on update type
         if (updateType == SALE) {
             dialogBuilder.setMessage(R.string.quantity_dialog_sale_msg);
         } else if (updateType == SHIPMENT) {
@@ -572,28 +552,27 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         dialogBuilder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
+                // User clicked the "Save" button
                 updateQuantity = Integer.parseInt(quantityUpdateText.getText().toString().trim());
                 String quantityString = mQuantityEditText.getText().toString().trim();
                 Integer newQuantity;
                 if (updateType == SALE) {
                     newQuantity = Math.max((Integer.parseInt(quantityString) - updateQuantity), 0);
-                    mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", newQuantity));
+                    mQuantityEditText.setText(String.format(Locale.getDefault(), "%1$d", newQuantity));
                     saveProduct();
                 } else if (updateType == SHIPMENT) {
                     newQuantity = Integer.parseInt(quantityString) + updateQuantity;
-                    mQuantityEditText.setText(String.format (Locale.getDefault(), "%1$d", newQuantity));
+                    mQuantityEditText.setText(String.format(Locale.getDefault(), "%1$d", newQuantity));
                     saveProduct();
                 } else if (updateType == REORDER) {
                     sendOrderEmail(Integer.parseInt(quantityString));
                 }
-
-                // Log.v(LOG_TAG, "Update type: " + updateType + "\nOriginal Quantity is: " + quantityString + "\nQuantity entered is: " + updateQuantity + "\nNew Quantity is: " + newQuantity);
             }
         });
         dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // User clicked the "Cancel" button, so dismiss the dialog
-                // and continue editing the pet.
+                // and continue editing the product.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
@@ -614,6 +593,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         return priceFormat.format(price);
     }
 
+    /**
+     * Format message and start an email intent for reordering a product
+     */
     public void sendOrderEmail(int quantity) {
         String nameString = mNameEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
@@ -631,6 +613,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    /**
+     * Starts an image chooser intent when "Select Image" button is clicked on
+     */
     public void openImageSelector(View view) {
         Intent intent;
 
@@ -645,6 +630,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
+    /**
+     * Gets and displays the picked product image's uri and bitmap
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         // The ACTION_OPEN_DOCUMENT intent was sent with the request code READ_REQUEST_CODE.
@@ -666,6 +654,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    /**
+     * Fetches and decodes bitmap image from file system
+     */
     private Bitmap getBitmapFromUri(Uri uri) {
         ParcelFileDescriptor parcelFileDescriptor = null;
         try {

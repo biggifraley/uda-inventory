@@ -1,7 +1,8 @@
 package com.example.android.inventory;
 
 /**
- * Created by Biggi on 10/16/2016.
+ * Created by Biggi on 10/16/2016
+ * for Udacity project.
  */
 
 import android.content.ContentUris;
@@ -78,12 +79,12 @@ public class ProductCursorAdapter extends CursorAdapter {
         final String productId = cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry._ID));
 
         // Set onclick listener on sale button
-        saleButton.setOnClickListener(new View.OnClickListener(){
+        saleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int saleQuantity = Integer.parseInt(productQuantity);
                 if (saleQuantity > 0) {
-                    saleQuantity -= 1; //TODO: change to saleQuantity--; and test again
+                    saleQuantity--;
                     ContentValues values = new ContentValues();
                     values.put(ProductContract.ProductEntry.COLUMN_PRODUCT_QUANTITY, saleQuantity);
                     Uri currentProductUri = ContentUris.withAppendedId(ProductContract.ProductEntry.CONTENT_URI, Long.parseLong(productId));
@@ -93,8 +94,8 @@ public class ProductCursorAdapter extends CursorAdapter {
             }
         });
 
-        String productDisplayQuantity = "Quantity: " + productQuantity; //TODO: figure out how to use string resource here
-        String productDisplayPrice = "Price: $" + productPrice;
+        String productDisplayQuantity = context.getString(R.string.quantity) + " " + productQuantity;
+        String productDisplayPrice = context.getString(R.string.price) + productPrice;
 
         // Populate fields with extracted properties
         nameTextView.setText(productName);

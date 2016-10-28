@@ -1,7 +1,8 @@
 package com.example.android.inventory.data;
 
 /**
- * Created by Biggi on 10/16/2016.
+ * Created by Biggi on 10/16/2016
+ * for Udacity project.
  */
 
 import android.content.Context;
@@ -55,8 +56,6 @@ public class ProductDbHelper extends SQLiteOpenHelper {
     /**
      * This is called when the database needs to be upgraded.
      */
-
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // The database is still at version 1, so there's nothing to be done here.

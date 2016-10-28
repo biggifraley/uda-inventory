@@ -127,7 +127,11 @@
 
     <!-- Label for sale button in catalog activity [CHAR LIMIT=12] -->
     <string name="sale_btn">Sale</string>
+
+    <!-- Label for select image button in editor activity [CHAR LIMIT=12] -->
     <string name="select_image">Select Image</string>
+
+    <!-- Label for image category of attributes in the editor [CHAR LIMIT=30] -->
     <string name="category_image">Product Image</string>
 
 </resources>

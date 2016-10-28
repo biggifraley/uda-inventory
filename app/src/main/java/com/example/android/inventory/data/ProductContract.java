@@ -5,7 +5,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Created by Biggi on 10/16/2016.
+ * Created by Biggi on 10/16/2016
+ * for Udacity project.
  */
 public class ProductContract {
     // To prevent someone from accidentally instantiating the contract class,
@@ -30,18 +31,18 @@ public class ProductContract {
     public static final String PATH_PRODUCTS = "products";
 
     /**
-     * Inner class that defines constant values for the pets database table.
-     * Each entry in the table represents a single pet.
+     * Inner class that defines constant values for the products database table.
+     * Each entry in the table represents a single product.
      */
     public static final class ProductEntry implements BaseColumns {
 
         /**
-         * The content URI to access the pet data in the provider
+         * The content URI to access the product data in the provider
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PRODUCTS);
 
         /**
-         * Name of database table for pets
+         * Name of database table for products
          */
         public final static String TABLE_NAME = "products";
 
@@ -81,9 +82,9 @@ public class ProductContract {
         public final static String COLUMN_PRODUCT_SUPPLIER = "supplier";
 
         /**
-         * Image of the product.
+         * Image Uri of the product.
          * <p/>
-         * Type: BLOB
+         * Type: TEXT
          */
         public final static String COLUMN_PRODUCT_IMAGE = "image";
 

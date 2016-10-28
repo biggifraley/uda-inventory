@@ -31,8 +31,6 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     // Create a new adapter that takes the list of products as inputs
     ProductCursorAdapter mCursorAdapter;
 
-    public static final String LOG_TAG = CatalogActivity.class.getSimpleName();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,33 +46,33 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             }
         });
 
-        // Find the ListView which will be populated with the pet data
-        ListView petListView = (ListView) findViewById(R.id.list);
+        // Find the ListView which will be populated with the product data
+        ListView productListView = (ListView) findViewById(R.id.list);
 
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
-        petListView.setEmptyView(emptyView);
+        productListView.setEmptyView(emptyView);
 
         // Create a new adapter that takes the list of products as inputs
         mCursorAdapter = new ProductCursorAdapter(this, null);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
-        petListView.setAdapter(mCursorAdapter);
+        productListView.setAdapter(mCursorAdapter);
 
-        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 // Create new intent to go to {@link EditorActivity}
                 Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
                 // Form the content URI to represent the specific product that was clicked on,
                 // by appending the "id" (passed as input to this method onto the
-                // {@link PetEntry#CONTENT_URI}.
+                // {@link ProductEntry#CONTENT_URI}.
 
-                Uri currentPetUri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI, id);
+                Uri currentProductUri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI, id);
                 // Set the URI on the data field of the intent
-                intent.setData(currentPetUri);
-                // Launch the {@link EditorActivity} to display the data for the current pet.
+                intent.setData(currentProductUri);
+                // Launch the {@link EditorActivity} to display the data for the current product.
                 startActivity(intent);
             }
         });
@@ -138,8 +136,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // Insert a new row for Jump Rope into the provider using the ContentResolver.
         // Use the {@link ProductEntry#CONTENT_URI} to indicate that we want to insert
         // into the products database table.
-        // Receive the new content URI that will allow us to access Jump Rope's data in the future.
-        Uri newUri = getContentResolver().insert(ProductEntry.CONTENT_URI, values);
+        getContentResolver().insert(ProductEntry.CONTENT_URI, values);
     }
 
     @Override
@@ -148,13 +145,12 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         switch (item.getItemId()) {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
-                // Insert dummy row for a pet in db
+                // Insert dummy row for a product in db
                 insertProduct();
-                // displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Delete the entire pet database
+                // Delete the entire product database
                 deleteAllProducts();
                 return true;
         }
@@ -162,7 +158,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     }
 
     /**
-     * Helper method to delete all pets in the database.
+     * Helper method to delete all products in the database.
      */
     private void deleteAllProducts() {
         int rowsDeleted = getContentResolver().delete(ProductEntry.CONTENT_URI, null, null);
